@@ -9,10 +9,30 @@ A powerful, reusable Angular column filter component with support for multiple f
 
 ## 🚀 Quick Links
 
+- 🎯 [Live Demo](https://ngx-column-filter.netlify.app/) - See it in action!
 - 📦 [NPM Package](https://www.npmjs.com/package/ngx-column-filter-popup)
 - 🏠 [GitHub Repository](https://github.com/kakarotx10/ngx-column-filter)
-- 📖 [Documentation](./DOCUMENTATION.md)
-- 💡 [Usage Examples](./USAGE_EXAMPLES.md)
+
+## 📚 Documentation & Guides
+
+**New to this library?** Start here:
+
+- 📖 **[Getting Started Tutorial](./GETTING_STARTED.md)** ⭐ - **Complete step-by-step guide: How to install, import, and use**
+  - Installation steps
+  - TypeScript imports explained
+  - Basic and advanced examples
+  - All field types with code samples
+  - Data filtering implementation
+  - Troubleshooting guide
+
+**More Resources:**
+
+- 📘 [Complete Documentation](./DOCUMENTATION.md) - Full API reference, all features explained
+- 💡 [Usage Examples](./USAGE_EXAMPLES.md) - Advanced usage patterns and programmatic control
+- 🚀 [Deployment Guide](./DEPLOYMENT.md) - How to deploy your Angular app
+
+## 🐛 Support
+
 - 🐛 [Report Bug](https://github.com/kakarotx10/ngx-column-filter/issues)
 - 💬 [Request Feature](https://github.com/kakarotx10/ngx-column-filter/issues)
 
@@ -46,6 +66,8 @@ npm install ngx-column-filter-popup
 ```
 
 **Note**: This package is published with TypeScript source files. Make sure your Angular project has TypeScript configured to compile these files.
+
+> 💡 **New to this library?** Check out the **[Getting Started Tutorial](./GETTING_STARTED.md)** for a complete step-by-step guide with examples!
 
 ## Quick Start
 
@@ -413,18 +435,33 @@ export class UserListComponent {
 }
 ```
 
-## Documentation
+## 📖 Documentation
 
-For comprehensive documentation including:
-- Detailed usage examples
-- How to adapt to different data structures
-- Match All Rules feature explanation
-- Complete API reference
-- Troubleshooting guide
+### For Beginners:
+- **[Getting Started Tutorial](./GETTING_STARTED.md)** - Step-by-step guide with examples
+  - What to import in TypeScript
+  - How to setup component
+  - Complete working examples
+  - Common patterns
 
-See [DOCUMENTATION.md](./DOCUMENTATION.md)
+### For Advanced Users:
+- **[Complete Documentation](./DOCUMENTATION.md)** - Full API reference
+  - All inputs and outputs
+  - Utility functions
+  - Type definitions
+  - Match modes explained
+  - Data structure adaptation
 
-For programmatic control examples, see [USAGE_EXAMPLES.md](./USAGE_EXAMPLES.md)
+- **[Usage Examples](./USAGE_EXAMPLES.md)** - Advanced patterns
+  - Programmatic filter control
+  - Multiple filters management
+  - Custom configurations
+
+- **[Deployment Guide](./DEPLOYMENT.md)** - Deploy your Angular app
+  - GitHub Pages
+  - Vercel
+  - Netlify
+  - Firebase Hosting
 
 ## Styling
 
