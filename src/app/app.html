@@ -1,0 +1,180 @@
+<div class="demo-container">
+  <header class="demo-header">
+    <h1>{{ title() }}</h1>
+    <p class="demo-subtitle">A reusable Angular column filter by Shivam Sharma</p>
+  </header>
+
+  <main class="demo-main">
+    <section class="demo-section">
+      <div class="demo-controls">
+        <h2>Sample Data Table</h2>
+        <button 
+          *ngIf="getActiveFiltersCount() > 0" 
+          class="clear-all-btn" 
+          (click)="clearAllFilters()"
+          type="button">
+          Clear All Filters ({{ getActiveFiltersCount() }} active)
+        </button>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="demo-table">
+          <thead>
+            <tr>
+              <th>
+                <div class="table-header">
+                  <span>First Name</span>
+                  <lib-column-filter 
+                    columnName="first name"
+                    columnKey="firstName"
+                    (filterApplied)="onFirstNameFilterApplied($event)"
+                    (filterCleared)="onFirstNameFilterCleared()">
+                  </lib-column-filter>
+                </div>
+              </th>
+              <th>
+                <div class="table-header">
+                  <span>Last Name</span>
+                  <lib-column-filter 
+                    columnName="last name"
+                    columnKey="lastName"
+                    (filterApplied)="onLastNameFilterApplied($event)"
+                    (filterCleared)="onLastNameFilterCleared()">
+                  </lib-column-filter>
+                </div>
+              </th>
+              <th>
+                <div class="table-header">
+                  <span>Email</span>
+                  <lib-column-filter 
+                    columnName="email"
+                    columnKey="email"
+                    (filterApplied)="onEmailFilterApplied($event)"
+                    (filterCleared)="onEmailFilterCleared()">
+                  </lib-column-filter>
+                </div>
+              </th>
+              <th>
+                <div class="table-header">
+                  <span>Role</span>
+                  <lib-column-filter 
+                    columnName="role"
+                    columnKey="role"
+                    (filterApplied)="onRoleFilterApplied($event)"
+                    (filterCleared)="onRoleFilterCleared()">
+                  </lib-column-filter>
+                </div>
+              </th>
+              <th>
+                <div class="table-header">
+                  <span>Balance</span>
+                  <lib-column-filter 
+                    columnName="balance"
+                    columnKey="balance"
+                    fieldType="currency"
+                    currencySymbol="$"
+                    (filterApplied)="onBalanceFilterApplied($event)"
+                    (filterCleared)="onBalanceFilterCleared()">
+                  </lib-column-filter>
+                </div>
+              </th>
+              <th>
+                <div class="table-header">
+                  <span>Date</span>
+                  <lib-column-filter 
+                    columnName="date"
+                    columnKey="date"
+                    fieldType="date"
+                    (filterApplied)="onDateFilterApplied($event)"
+                    (filterCleared)="onDateFilterCleared()">
+                  </lib-column-filter>
+                </div>
+              </th>
+              <th>
+                <div class="table-header">
+                  <span>Status</span>
+                  <lib-column-filter 
+                    columnName="status"
+                    columnKey="status"
+                    fieldType="status"
+                    [statusOptions]="statusOptions"
+                    (filterApplied)="onStatusFilterApplied($event)"
+                    (filterCleared)="onStatusFilterCleared()">
+                  </lib-column-filter>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredData">
+              <td>{{ item.firstName }}</td>
+              <td>{{ item.lastName }}</td>
+              <td>{{ item.email }}</td>
+              <td>{{ item.role }}</td>
+              <td>{{ formatCurrency(item.balance || 0) }}</td>
+              <td>{{ formatDate(item.date || '') }}</td>
+              <td>
+                <span class="status-badge" [class]="'status-' + (item.status || '')">
+                  {{ item.status }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="filteredData.length === 0">
+              <td colspan="7" class="no-results">No results found</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="7" class="table-footer">
+                Showing {{ filteredData.length }} of {{ originalData.length }} records
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+
+    <section class="demo-section usage-section">
+      <h2>Usage Examples</h2>
+      
+      <h3>Text Field (Default)</h3>
+      <pre class="code-block"><code>&lt;lib-column-filter 
+  columnName="first name"
+  columnKey="firstName"
+  fieldType="text"
+  (filterApplied)="onFilterApplied($event)"
+  (filterCleared)="onFilterCleared()"&gt;
+&lt;/lib-column-filter&gt;</code></pre>
+
+      <h3>Currency Field</h3>
+      <pre class="code-block"><code>&lt;lib-column-filter 
+  columnName="balance"
+  columnKey="balance"
+  fieldType="currency"
+  currencySymbol="$"
+  (filterApplied)="onBalanceFilterApplied($event)"
+  (filterCleared)="onBalanceFilterCleared()"&gt;
+&lt;/lib-column-filter&gt;</code></pre>
+
+      <h3>Date Field</h3>
+      <pre class="code-block"><code>&lt;lib-column-filter 
+  columnName="date"
+  columnKey="date"
+  fieldType="date"
+  (filterApplied)="onDateFilterApplied($event)"
+  (filterCleared)="onDateFilterCleared()"&gt;
+&lt;/lib-column-filter&gt;</code></pre>
+
+      <h3>Status Field</h3>
+      <pre class="code-block"><code>&lt;lib-column-filter 
+  columnName="status"
+  columnKey="status"
+  fieldType="status"
+  [statusOptions]="['qualified', 'unqualified', 'negotiation', 'new']"
+  (filterApplied)="onStatusFilterApplied($event)"
+  (filterCleared)="onStatusFilterCleared()"&gt;
+&lt;/lib-column-filter&gt;</code></pre>
+    </section>
+  </main>
+</div>
