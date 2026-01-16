@@ -54,6 +54,19 @@ export class ColumnFilterComponent implements OnInit, OnDestroy {
   @Input() currencySymbol: string = '$';
 
   /**
+   * Backend mode: when true, component only emits filter data without applying frontend filtering.
+   * The emitted FilterConfig is ready to be sent directly to a backend API.
+   * When false, existing frontend filtering behavior continues as-is.
+   */
+  @Input() backendMode: boolean = false;
+
+  /**
+   * Allow multiple rules: when true, users can add/remove multiple filter rules.
+   * When false, only a single rule is allowed (Add Rule and Remove Rule buttons are hidden).
+   */
+  @Input() allowMultipleRules: boolean = true;
+
+  /**
    * Emitted when filter is applied with the filter configuration
    */
   @Output() filterApplied = new EventEmitter<FilterConfig>();
@@ -176,7 +189,7 @@ export class ColumnFilterComponent implements OnInit, OnDestroy {
     private filterService: ColumnFilterService
   ) {
     // Generate unique ID for this filter instance
-    this.filterId = `filter-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    this.filterId = `filter-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
     // Initialize with one default rule
     this.addRule();
   }
@@ -317,21 +330,35 @@ export class ColumnFilterComponent implements OnInit, OnDestroy {
 
   /**
    * Apply the filter and emit the filter configuration
+   * In backendMode: emits filter data ready for backend API (no frontend filtering applied)
+   * In frontend mode: emits filter configuration for local filtering
    */
   applyFilter(): void {
+    // Filter out empty rules
     const validRules = this.filterRules.filter(rule => {
       if (this.fieldType === 'status') {
         return rule.value !== '';
       }
       return rule.value.trim() !== '';
     });
+
     if (validRules.length > 0) {
-      this.filterApplied.emit({ 
-        rules: validRules,
+      // Create clean, structured payload ready for backend API
+      const filterPayload: FilterConfig = {
+        rules: validRules.map(rule => ({
+          id: rule.id,
+          matchType: rule.matchType,
+          value: rule.value.trim()
+        })),
         globalMatchMode: this.globalMatchMode,
         fieldType: this.fieldType,
         statusOptions: this.statusOptions.length > 0 ? this.statusOptions : undefined
-      });
+      };
+
+      // Emit filter configuration
+      // When backendMode is true, parent should send this payload to backend API
+      // When backendMode is false, parent should use this for local filtering
+      this.filterApplied.emit(filterPayload);
     }
     this.showDropdown = false;
     this.filterService.closeFilter(this.filterId);
@@ -340,16 +367,55 @@ export class ColumnFilterComponent implements OnInit, OnDestroy {
   /**
    * Clear all filter rules and emit clear event
    * This method can be called programmatically from parent components
+   * Resets filter to initial state and updates UI icon accordingly
    */
   clearFilter(): void {
-    this.filterRules = [];
-    this.addRule(); // Add one empty rule
-    this.globalMatchMode = 'match-any-rule'; // Reset to default
-    this.filterCleared.emit();
+    // Get default match type for this field type
+    let defaultMatchType: MatchType = 'contains';
+    if (this.fieldType === 'currency' || this.fieldType === 'age') {
+      defaultMatchType = 'equals';
+    } else if (this.fieldType === 'date') {
+      defaultMatchType = 'is';
+    } else if (this.fieldType === 'status') {
+      defaultMatchType = 'is';
+    }
+
+    // Ensure default match type is valid from available match types
+    const availableTypes = this.matchTypes;
+    if (availableTypes.length > 0) {
+      const typeExists = availableTypes.some(type => type.value === defaultMatchType);
+      if (!typeExists) {
+        defaultMatchType = availableTypes[0].value as MatchType;
+      }
+    }
+
+    // Create completely new array with one empty rule to ensure UI properly resets
+    // Using array literal assignment forces Angular to re-render all inputs
+    // IMPORTANT: Empty string value ensures hasActiveFilter() returns false
+    this.filterRules = [{
+      id: this.generateId(),
+      matchType: defaultMatchType,
+      value: '' // Empty value ensures hasActiveFilter() returns false
+    }];
+    
+    // Reset global match mode to default
+    this.globalMatchMode = 'match-any-rule';
+    
+    // Close dropdown if open FIRST (before emitting events)
     this.showDropdown = false;
     this.filterService.closeFilter(this.filterId);
-    // Force change detection to update UI icon
+    
+    // Force change detection BEFORE emitting to ensure UI updates
+    // This ensures hasActiveFilter() returns false and icon switches from blinking red to normal gray
     this.cdr.detectChanges();
+    
+    // Emit clear event to notify parent component AFTER UI update
+    this.filterCleared.emit();
+    
+    // Additional change detection after emit to ensure icon updates
+    setTimeout(() => {
+      this.cdr.detectChanges();
+    }, 0);
   }
 
   /**
@@ -475,6 +541,6 @@ export class ColumnFilterComponent implements OnInit, OnDestroy {
    * Generate a unique ID for a filter rule
    */
   private generateId(): string {
-    return `rule-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `rule-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 }

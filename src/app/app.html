@@ -25,10 +25,12 @@
                 <div class="table-header">
                   <span>First Name</span>
                   <lib-column-filter 
+                    [allowMultipleRules]="false"
                     columnName="first name"
                     columnKey="firstName"
-                    (filterApplied)="onFirstNameFilterApplied($event)"
-                    (filterCleared)="onFirstNameFilterCleared()">
+                    [backendMode]="isBackendMode('firstName')"
+                    (filterApplied)="onFilterApplied('firstName', $event)"
+                    (filterCleared)="onFilterCleared('firstName')">
                   </lib-column-filter>
                 </div>
               </th>
@@ -38,8 +40,9 @@
                   <lib-column-filter 
                     columnName="last name"
                     columnKey="lastName"
-                    (filterApplied)="onLastNameFilterApplied($event)"
-                    (filterCleared)="onLastNameFilterCleared()">
+                    [backendMode]="isBackendMode('lastName')"
+                    (filterApplied)="onFilterApplied('lastName', $event)"
+                    (filterCleared)="onFilterCleared('lastName')">
                   </lib-column-filter>
                 </div>
               </th>
@@ -49,8 +52,9 @@
                   <lib-column-filter 
                     columnName="email"
                     columnKey="email"
-                    (filterApplied)="onEmailFilterApplied($event)"
-                    (filterCleared)="onEmailFilterCleared()">
+                    [backendMode]="isBackendMode('email')"
+                    (filterApplied)="onFilterApplied('email', $event)"
+                    (filterCleared)="onFilterCleared('email')">
                   </lib-column-filter>
                 </div>
               </th>
@@ -60,8 +64,9 @@
                   <lib-column-filter 
                     columnName="role"
                     columnKey="role"
-                    (filterApplied)="onRoleFilterApplied($event)"
-                    (filterCleared)="onRoleFilterCleared()">
+                    [backendMode]="isBackendMode('role')"
+                    (filterApplied)="onFilterApplied('role', $event)"
+                    (filterCleared)="onFilterCleared('role')">
                   </lib-column-filter>
                 </div>
               </th>
@@ -73,8 +78,9 @@
                     columnKey="balance"
                     fieldType="currency"
                     currencySymbol="$"
-                    (filterApplied)="onBalanceFilterApplied($event)"
-                    (filterCleared)="onBalanceFilterCleared()">
+                    [backendMode]="isBackendMode('balance')"
+                    (filterApplied)="onFilterApplied('balance', $event)"
+                    (filterCleared)="onFilterCleared('balance')">
                   </lib-column-filter>
                 </div>
               </th>
@@ -85,8 +91,9 @@
                     columnName="date"
                     columnKey="date"
                     fieldType="date"
-                    (filterApplied)="onDateFilterApplied($event)"
-                    (filterCleared)="onDateFilterCleared()">
+                    [backendMode]="isBackendMode('date')"
+                    (filterApplied)="onFilterApplied('date', $event)"
+                    (filterCleared)="onFilterCleared('date')">
                   </lib-column-filter>
                 </div>
               </th>
@@ -98,8 +105,9 @@
                     columnKey="status"
                     fieldType="status"
                     [statusOptions]="statusOptions"
-                    (filterApplied)="onStatusFilterApplied($event)"
-                    (filterCleared)="onStatusFilterCleared()">
+                    [backendMode]="isBackendMode('status')"
+                    (filterApplied)="onFilterApplied('status', $event)"
+                    (filterCleared)="onFilterCleared('status')">
                   </lib-column-filter>
                 </div>
               </th>

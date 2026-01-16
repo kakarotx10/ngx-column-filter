@@ -12,6 +12,7 @@ Complete step-by-step guide to use `ngx-column-filter-popup` in your Angular app
 6. [All Field Types](#all-field-types)
 7. [Applying Filters to Data](#applying-filters-to-data)
 8. [Advanced Examples](#advanced-examples)
+9. [Backend Mode (Optional)](#backend-mode-optional)
 
 ---
 
@@ -653,6 +654,53 @@ private applyAllFilters() {
   this.filteredData = result;
 }
 ```
+
+---
+
+## 9. Backend Mode (Optional)
+
+### What is Backend Mode?
+
+When you enable `backendMode`, the component collects filter data and emits it in a format ready for your backend API. No frontend filtering is applied.
+
+### Quick Example:
+
+```html
+<lib-column-filter
+  columnName="first name"
+  columnKey="firstName"
+  [backendMode]="true"
+  (filterApplied)="onFilterApplied('firstName', $event)"
+  (filterCleared)="onFilterCleared('firstName')">
+</lib-column-filter>
+```
+
+```typescript
+filters = new Map<string, FilterConfig | null>();
+readonly backendModeColumns = new Set<string>(['firstName', 'email']);
+
+onFilterApplied(columnKey: string, filterConfig: FilterConfig) {
+  this.filters.set(columnKey, filterConfig);
+  this.sendToBackend(); // Send to your API
+}
+```
+
+The component emits filter data in this format:
+```json
+{
+  "activeFilters": [
+    {
+      "field": "firstName",
+      "matchType": "contains",
+      "value": "John",
+      "fieldType": "text"
+    }
+  ],
+  "count": 1
+}
+```
+
+**📘 For complete backend mode guide**, see [DOCUMENTATION.md](./DOCUMENTATION.md#backend-mode-backend-api-integration) or [USAGE_EXAMPLES.md](./USAGE_EXAMPLES.md#4-backend-mode---backend-api-integration).
 
 ---
 

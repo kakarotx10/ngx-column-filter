@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, QueryList, ViewChildren, signal } from '@angular/core';
 import { ColumnFilterComponent } from './components/column-filter/column-filter.component';
 import { FilterConfig } from './lib/models/filter.models';
 import { applyColumnFilter } from './lib/utils/column-filter.utils';
@@ -24,6 +24,9 @@ interface SampleData {
 export class App {
   protected readonly title = signal('Column Filter Library Demo');
 
+  // Access all filter components to clear UI state when needed
+  @ViewChildren(ColumnFilterComponent) filterComponents!: QueryList<ColumnFilterComponent>;
+
   // Sample data
   originalData: SampleData[] = [
     { id: 1, firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', role: 'Developer', balance: 70663, date: '2015-09-13', status: 'qualified' },
@@ -40,143 +43,105 @@ export class App {
 
   filteredData: SampleData[] = [...this.originalData];
 
-  // Filter configurations
-  firstNameFilter: FilterConfig | null = null;
-  lastNameFilter: FilterConfig | null = null;
-  emailFilter: FilterConfig | null = null;
-  roleFilter: FilterConfig | null = null;
-  balanceFilter: FilterConfig | null = null;
-  dateFilter: FilterConfig | null = null;
-  statusFilter: FilterConfig | null = null;
+  // ✅ Unified filter storage - single source of truth for all filters
+  filters = new Map<string, FilterConfig | null>();
+
+  // ✅ Configuration: Define which columns use backend mode
+  readonly backendModeColumns = new Set<string>(['firstName', 'email']);
 
   // Status options for status field
   statusOptions = ['qualified', 'unqualified', 'negotiation', 'new', 'renewal', 'proposal'];
 
-  onFirstNameFilterApplied(filterConfig: FilterConfig) {
-    this.firstNameFilter = filterConfig;
+  // ✅ Generic filter handler - works for all columns
+  onFilterApplied(columnKey: string, filterConfig: FilterConfig): void {
+    this.filters.set(columnKey, filterConfig);
+    
+    // Send backend filters if this column uses backend mode
+    if (this.isBackendMode(columnKey)) {
+      this.sendAllBackendFiltersToBackend();
+    }
+    
     this.applyAllFilters();
   }
 
-  onFirstNameFilterCleared() {
-    this.firstNameFilter = null;
+  // ✅ Generic filter clear handler - works for all columns
+  onFilterCleared(columnKey: string): void {
+    this.filters.set(columnKey, null);
+    
+    // Send backend filters if this column uses backend mode
+    if (this.isBackendMode(columnKey)) {
+      this.sendAllBackendFiltersToBackend();
+    }
+    
     this.applyAllFilters();
   }
 
-  onLastNameFilterApplied(filterConfig: FilterConfig) {
-    this.lastNameFilter = filterConfig;
-    this.applyAllFilters();
+  // ✅ Check if a column uses backend mode
+  isBackendMode(columnKey: string): boolean {
+    return this.backendModeColumns.has(columnKey);
   }
 
-  onLastNameFilterCleared() {
-    this.lastNameFilter = null;
-    this.applyAllFilters();
+  // ✅ Get filter config for a column
+  getFilter(columnKey: string): FilterConfig | null {
+    return this.filters.get(columnKey) || null;
   }
 
-  onEmailFilterApplied(filterConfig: FilterConfig) {
-    this.emailFilter = filterConfig;
-    this.applyAllFilters();
-  }
-
-  onEmailFilterCleared() {
-    this.emailFilter = null;
-    this.applyAllFilters();
-  }
-
-  onRoleFilterApplied(filterConfig: FilterConfig) {
-    this.roleFilter = filterConfig;
-    this.applyAllFilters();
-  }
-
-  onRoleFilterCleared() {
-    this.roleFilter = null;
-    this.applyAllFilters();
-  }
-
-  onBalanceFilterApplied(filterConfig: FilterConfig) {
-    this.balanceFilter = filterConfig;
-    this.applyAllFilters();
-  }
-
-  onBalanceFilterCleared() {
-    this.balanceFilter = null;
-    this.applyAllFilters();
-  }
-
-  onDateFilterApplied(filterConfig: FilterConfig) {
-    this.dateFilter = filterConfig;
-    this.applyAllFilters();
-  }
-
-  onDateFilterCleared() {
-    this.dateFilter = null;
-    this.applyAllFilters();
-  }
-
-  onStatusFilterApplied(filterConfig: FilterConfig) {
-    this.statusFilter = filterConfig;
-    this.applyAllFilters();
-  }
-
-  onStatusFilterCleared() {
-    this.statusFilter = null;
-    this.applyAllFilters();
-  }
-
-  private applyAllFilters() {
+  // ✅ Apply all filters - automatically skips backend mode columns
+  private applyAllFilters(): void {
     let result = [...this.originalData];
 
-    if (this.firstNameFilter) {
-      result = applyColumnFilter(result, 'firstName', this.firstNameFilter);
-    }
-
-    if (this.lastNameFilter) {
-      result = applyColumnFilter(result, 'lastName', this.lastNameFilter);
-    }
-
-    if (this.emailFilter) {
-      result = applyColumnFilter(result, 'email', this.emailFilter);
-    }
-
-    if (this.roleFilter) {
-      result = applyColumnFilter(result, 'role', this.roleFilter);
-    }
-
-    if (this.balanceFilter) {
-      result = applyColumnFilter(result, 'balance', this.balanceFilter);
-    }
-
-    if (this.dateFilter) {
-      result = applyColumnFilter(result, 'date', this.dateFilter);
-    }
-
-    if (this.statusFilter) {
-      result = applyColumnFilter(result, 'status', this.statusFilter);
-    }
+    // Loop through all filters and apply frontend filters only
+    this.filters.forEach((filterConfig, columnKey) => {
+      // Skip backend mode columns (they're handled by backend API)
+      if (filterConfig && !this.isBackendMode(columnKey)) {
+        result = applyColumnFilter(result, columnKey, filterConfig);
+      }
+    });
 
     this.filteredData = result;
   }
 
+  // ✅ Get count of active filters
   getActiveFiltersCount(): number {
     let count = 0;
-    if (this.firstNameFilter) count++;
-    if (this.lastNameFilter) count++;
-    if (this.emailFilter) count++;
-    if (this.roleFilter) count++;
-    if (this.balanceFilter) count++;
-    if (this.dateFilter) count++;
-    if (this.statusFilter) count++;
+    this.filters.forEach((filterConfig) => {
+      if (filterConfig) count++;
+    });
     return count;
   }
 
-  clearAllFilters() {
-    this.firstNameFilter = null;
-    this.lastNameFilter = null;
-    this.emailFilter = null;
-    this.roleFilter = null;
-    this.balanceFilter = null;
-    this.dateFilter = null;
-    this.statusFilter = null;
+  // ✅ Clear all filters
+  clearAllFilters(): void {
+    this.filters.clear();
+    this.sendAllBackendFiltersToBackend();
     this.filteredData = [...this.originalData];
+
+    // Clear UI state in all filter components (icons/inputs)
+    if (this.filterComponents) {
+      this.filterComponents.forEach((filter: ColumnFilterComponent) => filter.clearFilter());
+    }
+  }
+
+  // ✅ Get all active filters as a simple array (for easy reading/inspection)
+  getActiveFilters(): Array<{ field: string; matchType: string; value: string; fieldType: string }> {
+    const activeFilters: Array<{ field: string; matchType: string; value: string; fieldType: string }> = [];
+    
+    this.filters.forEach((filterConfig, columnKey) => {
+      if (filterConfig && filterConfig.rules.length > 0) {
+        filterConfig.rules.forEach(rule => {
+          if (rule.value && rule.value.trim() !== '') {
+            activeFilters.push({
+              field: columnKey,
+              matchType: rule.matchType,
+              value: rule.value.trim(),
+              fieldType: filterConfig.fieldType || 'text'
+            });
+          }
+        });
+      }
+    });
+
+    return activeFilters;
   }
 
   formatCurrency(value: number): string {
@@ -187,5 +152,64 @@ export class App {
     if (!value) return '';
     const date = new Date(value);
     return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  }
+
+  /**
+   * ✅ Collect and send all active backend filters to backend API
+   * Automatically processes all columns that use backend mode
+   * 
+   * Payload format:
+   * {
+   *   "activeFilters": [
+   *     { "field": "firstName", "matchType": "contains", "value": "test", "fieldType": "text" },
+   *     { "field": "email", "matchType": "contains", "value": "testtt", "fieldType": "text" }
+   *   ],
+   *   "count": 2
+   * }
+   */
+  private sendAllBackendFiltersToBackend(): void {
+    const activeFilters: Array<{
+      field: string;
+      matchType: string;
+      value: string;
+      fieldType: string;
+    }> = [];
+
+    // Process all backend mode columns
+    this.backendModeColumns.forEach(columnKey => {
+      const filterConfig = this.filters.get(columnKey);
+      
+      if (filterConfig && filterConfig.rules.length > 0) {
+        filterConfig.rules.forEach(rule => {
+          if (rule.value && rule.value.trim() !== '') {
+            activeFilters.push({
+              field: columnKey,
+              matchType: rule.matchType,
+              value: rule.value.trim(),
+              fieldType: filterConfig.fieldType || 'text'
+            });
+          }
+        });
+      }
+    });
+
+    const payload = {
+      activeFilters: activeFilters,
+      count: activeFilters.length
+    };
+
+    // Log the payload (in production, send this to your backend API)
+    console.log('📤 Sending all active backend filters to API:', payload);
+    
+    // Example: Actual API call would look like this:
+    // this.httpClient.post('/api/filters', payload).subscribe({
+    //   next: (response) => {
+    //     // Update filteredData with response from backend
+    //     this.filteredData = response.data;
+    //   },
+    //   error: (error) => {
+    //     console.error('Error sending filters to backend:', error);
+    //   }
+    // });
   }
 }

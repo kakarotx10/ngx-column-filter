@@ -22,6 +22,7 @@
   }
 
   &:focus {
+    outline: none;
     // outline: 2px solid #28a745;
     // outline-offset: 2px;
   }
@@ -36,6 +37,30 @@
 
   i {
     font-size: 14px;
+  }
+
+  // Active filter icon with blinking animation
+  .active-filter-icon {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .blink-animation {
+    animation: blinkFilter 1.5s ease-in-out infinite;
+  }
+}
+
+// Blinking animation for active filter icon - smooth and noticeable
+@keyframes blinkFilter {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1.2);
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.4);
+    filter: brightness(1.3);
   }
 }
 
